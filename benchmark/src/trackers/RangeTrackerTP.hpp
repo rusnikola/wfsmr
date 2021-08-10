@@ -119,7 +119,7 @@ public:
 		pool->freeBlock(block, local_tid);
 	}
 
-	T* read(std::atomic<T*>& obj, int idx, int tid){
+	T* read(std::atomic<T*>& obj, int idx, int tid, T* node){
 		return read(obj, tid);
 	}
     T* read(std::atomic<T*>& obj, int tid){

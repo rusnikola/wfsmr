@@ -79,7 +79,7 @@ BonsaiTree<K, V>::Node::~Node() {
 template<class K, class V>
 BonsaiTree<K, V>::BonsaiTree(GlobalTestConfig* gtc): RetiredMonitorable(gtc){
 	std::string type = gtc->getEnv("tracker");
-	if (type == "Hazard" || type == "HE") errexit("Hazard and HE not available ");
+	if (type == "Hazard" || type == "HE" || type == "WFE") errexit("Hazard, HE, and WFE not available ");
 	int epochf = gtc->getEnv("epochf").empty()? 150:stoi(gtc->getEnv("epochf"));
 	int emptyf = gtc->getEnv("emptyf").empty()? 30:stoi(gtc->getEnv("emptyf"));
 	memory_tracker = new MemoryTracker<Node>(gtc, epochf, emptyf, 2, true);
@@ -174,7 +174,7 @@ unsigned long BonsaiTree<K, V>::treeSize(){
 
 template<class K, class V>
 typename BonsaiTree<K, V>::Node* BonsaiTree<K, V>::protect_read(atomic<BonsaiTree<K, V>::Node*>& node){
-	return memory_tracker->read(node, 0, local_tid);
+	return memory_tracker->read(node, 0, local_tid, nullptr);
 }
 
 template<class K, class V>
@@ -200,7 +200,7 @@ optional<V> BonsaiTree<K, V>::update(Operation op, K key, V val, int tid){
 #ifndef LAZY_TRACKER
 		memory_tracker->start_op(tid);
 #endif
-		old_state = memory_tracker->read(curr_state, 0, tid);
+		old_state = memory_tracker->read(curr_state, 0, tid, nullptr);
 		new_state = mkState();
 		switch(op){
 			case op_put:

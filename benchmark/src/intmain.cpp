@@ -31,6 +31,7 @@ limitations under the License.
 #include "rideables/NatarajanTree.hpp"
 #include "rideables/LinkList.hpp"
 #include "rideables/LinkListStall.hpp"
+#include "rideables/CRTurnQueue.hpp"
 
 #if (__x86_64__ || __ppc64__)
 #include "rideables/SortedUnorderedMapRange.hpp"
@@ -67,6 +68,8 @@ int main(int argc, char *argv[])
 
 	gtc->addRideableOption(new SortedUnorderedMapStallFactory<int,int>(), "SortedUnorderedMapStall");
 	gtc->addRideableOption(new LinkListStallFactory<int,int>(), "LinkListStall");
+
+	gtc->addRideableOption(new CRTurnQueueFactory<int,int>(), "CRTurnQueue");
 
 	//gtc->addRideableOption(new SortedUnorderedMapHazardFactory<int,int>(), "SortedUnorderedMapHazard");
 	// gtc->addRideableOption(new SortedUnorderedMapRCUFactory<int,int>(), "SortedUnorderedMapRCU");

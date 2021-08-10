@@ -121,7 +121,7 @@ public:
 	HazardTracker(int task_num, int slotsPerThread, int emptyFreq): 
 		HazardTracker(task_num, slotsPerThread, emptyFreq, true){}
 
-	T* read(std::atomic<T*>& obj, int idx, int tid){
+	T* read(std::atomic<T*>& obj, int idx, int tid, T* node){
 		T* ret;
 		T* realptr;
 		while(true){
@@ -135,6 +135,9 @@ public:
 	}
 
 	void reserve_slot(T* ptr, int slot, int tid){
+		slots[tid].entry[slot] = ptr;
+	}
+	void reserve_slot(T* ptr, int slot, int tid, T* node){
 		slots[tid].entry[slot] = ptr;
 	}
 	void clearSlot(int slot, int tid){

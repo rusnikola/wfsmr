@@ -77,7 +77,7 @@ public:
 		}
 		retire_counters = new padded<uint64_t>[task_num];
 		alloc_counters = new padded<uint64_t>[task_num];
-		epoch.ui.store(1, std::memory_order_release);
+		epoch.ui.store(1, std::memory_order_release); // use 0 as infinity
 	}
 	HETracker(int task_num, int emptyFreq) : HETracker(task_num,emptyFreq,true){}
 
@@ -104,7 +104,7 @@ public:
 		free ((char*)obj);
 	}
 
-	T* read(std::atomic<T*>& obj, int index, int tid){
+	T* read(std::atomic<T*>& obj, int index, int tid, T* node){
 		uint64_t prev_epoch = reservations[tid].entry[index].load(std::memory_order_acquire);
 		while(true){
 			T* ptr = obj.load(std::memory_order_acquire);
@@ -119,7 +119,7 @@ public:
 		}
 	}
 
-	void reserve_slot(T* obj, int index, int tid){
+	void reserve_slot(T* obj, int index, int tid, T* node){
 		uint64_t prev_epoch = reservations[tid].entry[index].load(std::memory_order_acquire);
 		while(true){
 			uint64_t curr_epoch = getEpoch();
@@ -145,13 +145,13 @@ public:
 	}
 	
 	void retire(T* obj, int tid){
-		if(obj==NULL){return;}
+		if (obj==NULL) {return;}
 		HEInfo** field = &(retired[tid].ui);
 		HEInfo* info = (HEInfo*) (obj + 1);
 		info->retire_epoch = epoch.ui.load(std::memory_order_acquire);
 		info->next = *field;
 		*field = info;
-		if(collect && retire_counters[tid]%freq==0){
+		if (collect && retire_counters[tid]%freq==0){
 			empty(tid);
 		}
 		retire_counters[tid]=retire_counters[tid]+1;

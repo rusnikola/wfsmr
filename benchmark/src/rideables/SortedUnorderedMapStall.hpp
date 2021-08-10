@@ -279,23 +279,25 @@ bool SortedUnorderedMapStall<K,V>::findNode(MarkPtr* &prev, Node* &cur, Node* &n
 	while(true){
 		size_t idx=hash_fn(key)%idxSize;
 		bool cmark=false;
+		Node *prevBlock = nullptr;
 		prev=&bucket[idx].ui;
 
-		cur=getPtr(memory_tracker->read(prev->ptr, 1, tid));
+		cur=getPtr(memory_tracker->read(prev->ptr, 1, tid, prevBlock));
 
 		while(true){//to lock old and cur
 			if(cur==nullptr) return false;
-			nxt=memory_tracker->read(cur->next.ptr, 0, tid);
+			nxt=memory_tracker->read(cur->next.ptr, 0, tid, cur);
 			cmark=getMk(nxt);
 			nxt=getPtr(nxt);
-			if(mixPtrMk(nxt,cmark)!=memory_tracker->read(cur->next.ptr, 1, tid))
+			if(mixPtrMk(nxt,cmark)!=memory_tracker->read(cur->next.ptr, 1, tid, cur))
 				break;//return findNode(prev,cur,nxt,key,tid);
 			auto ckey=cur->key;
-			if(memory_tracker->read(prev->ptr, 2, tid)!=cur)
+			if(memory_tracker->read(prev->ptr, 2, tid, prevBlock)!=cur)
 				break;//return findNode(prev,cur,nxt,key,tid);
 			if(!cmark){
 				if(ckey>=key) return ckey==key;
 				prev=&(cur->next);
+				prevBlock = cur;
 			}
 			else{
 				if(prev->ptr.compare_exchange_strong(cur,nxt,std::memory_order_acq_rel))

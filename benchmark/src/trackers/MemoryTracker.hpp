@@ -42,6 +42,7 @@ limitations under the License.
 #include "RangeTrackerNew.hpp"
 #include "HazardTracker.hpp"
 #include "HETracker.hpp"
+#include "WFETracker.hpp"
 #if !(__x86_64__ || __ppc64__)
 #include "RangeTrackerTP.hpp"
 #endif
@@ -62,7 +63,7 @@ enum TrackerType{
 	Hazard = 1,
 	Hazard_dynamic = 3,
 	HE = 5,
-	FORK = 13,
+	WFE = 7,
 	HyalineEL = 18,
 	HyalineSEL = 19,
 	HyalineOEL = 20,
@@ -151,6 +152,9 @@ public:
 			// tracker = new HETracker<T>(task_num, slot_num, 1, collect);
 			tracker = new HETracker<T>(task_num, slot_num, epoch_freq, empty_freq, collect);
 			type = HE;
+		} else if (tracker_type == "WFE"){
+			tracker = new WFETracker<T>(task_num, slot_num, epoch_freq, empty_freq, collect);
+			type = WFE;
 		} else if (tracker_type == "QSBR"){
 			tracker = new RCUTracker<T>(task_num, epoch_freq, empty_freq, type_QSBR, collect);
 			type = QSBR;
@@ -205,8 +209,12 @@ public:
 		tracker->end_op(tid);
 	}
 
-	T* read(std::atomic<T*>& obj, int idx, int tid){
-		return tracker->read(obj, slot_renamers[tid].ui[idx], tid);
+	T* read(std::atomic<T*>& obj, int idx, int tid, T* node){
+		return tracker->read(obj, slot_renamers[tid].ui[idx], tid, node);
+	}
+
+	void reserve_slot(T* ptr, int slot, int tid, T* node){
+		return tracker->reserve_slot(ptr, slot, tid, node);
 	}
 
 	void transfer(int src_idx, int dst_idx, int tid){

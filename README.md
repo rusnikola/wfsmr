@@ -1,16 +1,10 @@
-# Hyaline Reclamation
-
-## Publications
-
-* [Paper](https://rusnikola.github.io/files/hyaline-pldi21.pdf): Snapshot-Free, Transparent, and Robust Memory Reclamation for Lock-Free Data Structures. Ruslan Nikolaev, and Binoy Ravindran. In Proceedings of the 42nd ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI'21). Virtual, Canada.
-
-* [Brief Announcement](https://rusnikola.github.io/files/hyaline-podc19.pdf): Hyaline: Fast and Transparent Lock-Free Memory Reclamation. Ruslan Nikolaev and Binoy Ravindran. In Proceedings of the 38th ACM Symposium on Principles of Distributed Computing (PODC'19). Toronto, ON, Canada.
+# Crystalline Reclamation
 
 ## Source Code
 
-Please see Hyaline's code in the 'hyaline' directory. We also used used an
-existent Interval-Based-Reclamation benchmark and integrated our new Hyaline
-schemes into the benchmark.
+This code further extends the existent Interval-Based-Reclamation benchmark.
+Crystalline's code is directly embedded into the benchmark. Hyaline's code in
+a separate 'hyaline' directory.
 
 ## Building
 
@@ -29,10 +23,10 @@ can type:
 
 sudo apt-get install build-essential libjemalloc-dev libhwloc-dev libc6-dev libc-dev make python
 
-To compile the benchmark with Hyaline:
+To compile the benchmark with Crystalline:
 
 * Go to 'benchmark'
-(This benchmark is already modified to use Hyaline.)
+(This benchmark is already modified to use Crystalline.)
 
 * Run 'make'
 
@@ -42,7 +36,7 @@ See the original IBR's instructions in the 'benchmark' directory.
 
 We had to change the default method of counting uncreclaimed
 objects in the benchmark, as the original approach would not work
-as is with Hyaline due to the global retirement of objects.
+as is with Hyaline or Crystalline due to the global retirement of objects.
 
 However, measurements become more expensive and skew throughput
 for some tests. For this reason, we introduced an extra '-c'

@@ -184,13 +184,13 @@ void NatarajanTree<K,V>::seek(K key, int tid){
 	Node keyNode{key,defltV,nullptr,nullptr};//node to be compared
 	SeekRecord* seekRecord=&(records[tid].ui);
 	seekRecord->ancestor=r;
-	seekRecord->successor=memory_tracker->read(r->left,1,tid);
-	seekRecord->parent=memory_tracker->read(r->left,2,tid);
-	seekRecord->leaf=getPtr(memory_tracker->read(s->left,3,tid));
+	seekRecord->successor=memory_tracker->read(r->left,1,tid,r);
+	seekRecord->parent=memory_tracker->read(r->left,2,tid,r);
+	seekRecord->leaf=getPtr(memory_tracker->read(s->left,3,tid,s));
 
 	/* initialize other variables used in the traversal */
-	Node* parentField=memory_tracker->read(seekRecord->parent->left,3,tid);
-	Node* currentField=memory_tracker->read(seekRecord->leaf->left,4,tid);
+	Node* parentField=memory_tracker->read(seekRecord->parent->left,3,tid,seekRecord->parent);
+	Node* currentField=memory_tracker->read(seekRecord->leaf->left,4,tid,seekRecord->leaf);
 	Node* current=getPtr(currentField);
 
 	/* traverse the tree */
@@ -216,10 +216,10 @@ void NatarajanTree<K,V>::seek(K key, int tid){
 		/* update other variables used in traversal */
 		parentField=currentField;
 		if(nodeLess(&keyNode,current)){
-			currentField=memory_tracker->read(current->left,4,tid);
+			currentField=memory_tracker->read(current->left,4,tid,current);
 		}
 		else{
-			currentField=memory_tracker->read(current->right,4,tid);
+			currentField=memory_tracker->read(current->right,4,tid,current);
 		}
 		current=getPtr(currentField);
 	}
@@ -597,8 +597,8 @@ std::map<K, V> NatarajanTree<K,V>::rangeQuery(K key1, K key2, int& len, int tid)
 	collect_retired_size(memory_tracker->get_retired_cnt(tid), tid);
 	memory_tracker->start_op(tid);
 	
-	Node* leaf=getPtr(memory_tracker->read(s->left,0,tid));
-	Node* current=getPtr(memory_tracker->read(leaf->left,1,tid));
+	Node* leaf=getPtr(memory_tracker->read(s->left,0,tid,s));
+	Node* current=getPtr(memory_tracker->read(leaf->left,1,tid,leaf));
 
 	std::map<K,V> res;
 	if(current!=nullptr)
@@ -610,8 +610,8 @@ std::map<K, V> NatarajanTree<K,V>::rangeQuery(K key1, K key2, int& len, int tid)
 
 template <class K, class V>
 void NatarajanTree<K,V>::doRangeQuery(Node& k1, Node& k2, int tid, Node* root, std::map<K,V>& res){
-	Node* left=getPtr(memory_tracker->read(root->left,2,tid));
-	Node* right=getPtr(memory_tracker->read(root->right,3,tid));
+	Node* left=getPtr(memory_tracker->read(root->left,2,tid,root));
+	Node* right=getPtr(memory_tracker->read(root->right,3,tid,root));
 	if(left==nullptr&&right==nullptr){
 		if(nodeLessEqual(&k1,root)&&nodeLessEqual(root,&k2)){
 			
