@@ -43,6 +43,8 @@ limitations under the License.
 #include "HazardTracker.hpp"
 #include "HETracker.hpp"
 #include "WFETracker.hpp"
+#include "HRTracker.hpp"
+#include "WFRTracker.hpp"
 #if !(__x86_64__ || __ppc64__)
 #include "RangeTrackerTP.hpp"
 #endif
@@ -64,6 +66,8 @@ enum TrackerType{
 	Hazard_dynamic = 3,
 	HE = 5,
 	WFE = 7,
+	HR = 9,
+	WFR = 11,
 	HyalineEL = 18,
 	HyalineSEL = 19,
 	HyalineOEL = 20,
@@ -155,6 +159,12 @@ public:
 		} else if (tracker_type == "WFE"){
 			tracker = new WFETracker<T>(task_num, slot_num, epoch_freq, empty_freq, collect);
 			type = WFE;
+		} else if (tracker_type == "HR"){
+			tracker = new HRTracker<T>(task_num, slot_num, epoch_freq, empty_freq, collect);
+			type = HR;
+		} else if (tracker_type == "WFR"){
+			tracker = new WFRTracker<T>(task_num, slot_num, epoch_freq, empty_freq, collect);
+			type = WFR;
 		} else if (tracker_type == "QSBR"){
 			tracker = new RCUTracker<T>(task_num, epoch_freq, empty_freq, type_QSBR, collect);
 			type = QSBR;

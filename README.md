@@ -3,8 +3,8 @@
 ## Source Code
 
 This code further extends the existent Interval-Based-Reclamation benchmark.
-Crystalline's code is directly embedded into the benchmark. Hyaline's code in
-a separate 'hyaline' directory.
+Crystalline's code is directly embedded into the benchmark. Hyaline's code is
+in a separate 'hyaline' directory.
 
 ## Building
 
@@ -49,4 +49,4 @@ the number of objects, you have to run a separate test with the -c flag.
 
 A sample command (not counting uncreclaimed objects):
 
-./bin/main -i 1 -m 3 -v -r 1 -o hashmap_result.csv  -t 4 -d tracker=HyalineEL
+./bin/main -i 1 -m 3 -v -r 1 -o hashmap_result.csv  -t 4 -d tracker=HR
