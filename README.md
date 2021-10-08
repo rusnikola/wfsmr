@@ -1,5 +1,9 @@
 # Crystalline Reclamation
 
+## Publications
+
+* [Brief Announcement](https://drops.dagstuhl.de/opus/volltexte/2021/14862/pdf/LIPIcs-DISC-2021-60.pdf): Crystalline: Fast and Memory Efficient Wait-Free Reclamation. Ruslan Nikolaev and Binoy Ravindran. In Proceedings of the 35th International Symposium on Distributed Computing (DISC'21). Freiburg, Germany.
+
 ## Source Code
 
 This code further extends the existent Interval-Based-Reclamation benchmark.
