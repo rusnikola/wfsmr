@@ -20,9 +20,9 @@
 library(plyr)
 library(ggplot2)
 
-filenames<-c("hashmap","list")
+filenames<-c("crturn")
 for (f in filenames){
-read.csv(paste("../final/",f,"_result_retired_read.csv",sep=""))->lindata
+read.csv(paste("../final/",f,"_result_retired.csv",sep=""))->lindata
 
 lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=RCU","EBR",lindata$environment))
 lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=Hazard","HP",lindata$environment))
@@ -76,18 +76,18 @@ y_range_up = 2000
 # Benchmark-specific plot formatting
 if(f=="bonsai"){
   y_range_down=0
-  legend_pos=c(0.4,0.9)
+  legend_pos=c(0.45,0.9)
   y_range_up=1700
 }else if(f=="list"){
   y_range_down=0
-  y_range_up=450
+  y_range_up=1590
 }else if(f=="crturn"){
   y_range_down=0
-  y_range_up=3190
+  y_range_up=6000
 }else if(f=="hashmap"){
-  y_range_up=4800
+  y_range_up=1650
 }else if(f=="natarajan"){
-  y_range_up=4300
+  y_range_up=3600
 }
 
 # Generate the plots
@@ -100,8 +100,8 @@ linchart<-ggplot(data=lindata,
   guides(color=guide_legend(title=NULL,nrow = 4))+
   guides(linetype=guide_legend(title=NULL,nrow = 4))+
   scale_color_manual(values=color_key[names(color_key) %in% lindata$environment])+
-  scale_x_continuous(breaks=c(1,16,32,48,64,80,96,128,160,192),
-                minor_breaks=c(1,16,32,48,64,80,96,112,128,144,160,176,192))+
+  scale_x_continuous(breaks=c(1,16,32,48,64,80,96),
+                minor_breaks=c(1,16,32,48,64,80,96))+
   theme(plot.margin = unit(c(.2,0,.2,0), "cm"))+
   theme(legend.position=legend_pos,
      legend.direction="horizontal")+
@@ -112,6 +112,6 @@ linchart<-ggplot(data=lindata,
   ylim(y_range_down,y_range_up)
 
 # Save all four plots to separate PDFs
-ggsave(filename = paste("../final/",f,"_linchart_retired_read.pdf",sep=""),linchart,width=5, height = 5, units = "in", dpi=300)
+ggsave(filename = paste("../final/",f,"_linchart_retired.pdf",sep=""),linchart,width=5, height = 5, units = "in", dpi=300)
 
 }

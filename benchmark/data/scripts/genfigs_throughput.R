@@ -20,46 +20,49 @@
 library(plyr)
 library(ggplot2)
 
-filenames<-c("hashmap","bonsai","list","natarajan")
+filenames<-c("hashmap","list")
 for (f in filenames){
 read.csv(paste("../final/",f,"_result.csv",sep=""))->lindata
 
-lindata$environment<-as.factor(gsub("emptyf=120:tracker=RCU","Epoch",lindata$environment))
-lindata$environment<-as.factor(gsub("emptyf=120:tracker=HE","HE",lindata$environment))
-lindata$environment<-as.factor(gsub("emptyf=120:tracker=Hazard","HP",lindata$environment))
-lindata$environment<-as.factor(gsub("emptyf=120:tracker=NIL","No MM",lindata$environment))
-lindata$environment<-as.factor(gsub("emptyf=120:tracker=HyalineOEL","Hyaline-1",lindata$environment))
-lindata$environment<-as.factor(gsub("emptyf=120:tracker=HyalineEL","Hyaline",lindata$environment))
-lindata$environment<-as.factor(gsub("emptyf=120:tracker=HyalineOSEL","Hyaline-1S",lindata$environment))
-lindata$environment<-as.factor(gsub("emptyf=120:tracker=HyalineSEL","Hyaline-S",lindata$environment))
-lindata$environment<-as.factor(gsub("emptyf=120:tracker=Range_new","IBR",lindata$environment))
+lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=RCU","EBR",lindata$environment))
+lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=Hazard","HP",lindata$environment))
+lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=NIL","None",lindata$environment))
+lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=HyalineOSEL","Hyaline-1S",lindata$environment))
+lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=HyalineOEL","Hyaline-1",lindata$environment))
+lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=WFR","Crystalline-W",lindata$environment))
+lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=HR","Crystalline-L",lindata$environment))
+lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=WFE","WFE",lindata$environment))
+lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=HE","HE",lindata$environment))
+lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=Range_new","IBR",lindata$environment))
 
 # Compute average and max retired objects per operation from raw data
 ddply(.data=lindata,.(environment,threads),mutate,retired_avg= mean(obj_retired)/(mean(ops)))->lindata
 ddply(.data=lindata,.(environment,threads),mutate,ops_max= max(ops)/(interval*1000000))->lindata
 
-nildatalin <- subset(lindata,environment=="No MM")
-rcudatalin <- subset(lindata,environment=="Epoch")
+nildatalin <- subset(lindata,environment=="None")
+rcudatalin <- subset(lindata,environment=="EBR")
 hazarddatalin <- subset(lindata,environment=="HP")
+hrdatalin <- subset(lindata,environment=="Crystalline-L")
+wfrdatalin <- subset(lindata,environment=="Crystalline-W")
+frdatalin <- subset(lindata,environment=="Hyaline-1")
+frrdatalin <- subset(lindata,environment=="Hyaline-1S")
+wfedatalin <- subset(lindata,environment=="WFE")
 hedatalin <- subset(lindata,environment=="HE")
-chaindatalin <- subset(lindata,environment=="Hyaline")
-chainodatalin <- subset(lindata,environment=="Hyaline-1")
-gtchaindatalin <- subset(lindata,environment=="Hyaline-S")
-gtchainodatalin <- subset(lindata,environment=="Hyaline-1S")
 rangenewdatalin <- subset(lindata,environment=="IBR")
 
-lindata = rbind(nildatalin, rcudatalin, chaindatalin, chainodatalin, gtchaindatalin, gtchainodatalin, rangenewdatalin, hedatalin, hazarddatalin)
-lindata$environment <- factor(lindata$environment, levels=c("No MM", "Epoch", "Hyaline", "Hyaline-1", "Hyaline-S", "Hyaline-1S", "IBR", "HE", "HP"))
+lindata = rbind(nildatalin, rcudatalin, wfrdatalin, hrdatalin, frrdatalin, frdatalin, wfedatalin, hedatalin, rangenewdatalin, hazarddatalin)
+lindata$environment <- factor(lindata$environment, levels=c("None", "EBR", "WFE", "HE", "Crystalline-W", "Crystalline-L", "Hyaline-1S", "Hyaline-1", "IBR", "HP"))
 
 # Set up colors and shapes (invariant for all plots)
 color_key = c("#000000", "#0000FF", "#FF0000", "#FF007F",
-              "#013220", "#3EB489", "#0066FF", "#800080", "#FFAA1D")
+              "#1BC40F", "#DA9100",
+              "#013220", "#3EB489", "#0066FF", "#800080")
 names(color_key) <- unique(c(as.character(lindata$environment)))
 
-shape_key = c(17,5,6,4,1,3,0,2,62)
+shape_key = c(17,5,6,4,2,62,1,3,0,18)
 names(shape_key) <- unique(c(as.character(lindata$environment)))
 
-line_key = c(1,1,1,2,1,2,4,4,1)
+line_key = c(1,1,1,2,1,2,1,2,4,1)
 names(line_key) <- unique(c(as.character(lindata$environment)))
 
 
@@ -67,22 +70,24 @@ names(line_key) <- unique(c(as.character(lindata$environment)))
 #### Begin charts for throughput ####
 #####################################
 
-legend_pos=c(0.4985,0.9)
+legend_pos=c(0.5,0.86)
 y_range_down = 0
-y_range_up = 135
+y_range_up = 180
 
 # Benchmark-specific plot formatting
 if(f=="bonsai"){
   y_range_down=0.07
-  legend_pos=c(0.5,0.15)
-  y_range_up=0.27
+  legend_pos=c(0.6,0.9)
+  y_range_up=0.25
 }else if(f=="list"){
   y_range_down=0
-  y_range_up=0.10
+  y_range_up=0.155
+}else if(f=="crturn"){
+  y_range_down=0
+  y_range_up=5.5
 }else if(f=="natarajan"){
-  y_range_up=55
+  y_range_up=77
 }else if(f=="hashmap"){
-  legend_pos=c(0.5,0.9)
 }
 
 # Generate the plots
@@ -91,12 +96,12 @@ linchart<-ggplot(data=lindata,
   geom_line()+xlab("Threads")+ylab("Throughput (M ops/sec)")+geom_point(size=4)+
   scale_shape_manual(values=shape_key[names(shape_key) %in% lindata$environment])+
   scale_linetype_manual(values=line_key[names(line_key) %in% lindata$environment])+
-  theme_bw()+ guides(shape=guide_legend(title=NULL,nrow = 2))+ 
-  guides(color=guide_legend(title=NULL,nrow = 2))+
-  guides(linetype=guide_legend(title=NULL,nrow = 2))+
+  theme_bw()+ guides(shape=guide_legend(title=NULL,nrow = 4))+ 
+  guides(color=guide_legend(title=NULL,nrow = 4))+
+  guides(linetype=guide_legend(title=NULL,nrow = 4))+
   scale_color_manual(values=color_key[names(color_key) %in% lindata$environment])+
-  scale_x_continuous(breaks=c(1,9,18,27,36,45,54,63,72,81,90,99,108,117,126,135,144),
-                minor_breaks=c(1,9,18,27,36,45,54,63,72,81,90,99,108,117,126,135,144))+
+  scale_x_continuous(breaks=c(1,16,32,48,64,80,96,128,160,192),
+                minor_breaks=c(1,16,32,48,64,80,96,112,128,144,160,176,192))+
   theme(plot.margin = unit(c(.2,0,.2,0), "cm"))+
   theme(legend.position=legend_pos,
      legend.direction="horizontal")+
@@ -107,6 +112,6 @@ linchart<-ggplot(data=lindata,
   ylim(y_range_down,y_range_up)
 
 # Save all four plots to separate PDFs
-ggsave(filename = paste("../final/",f,"_linchart_throughput.pdf",sep=""),linchart,width=7.3, height = 5, units = "in", dpi=300)
+ggsave(filename = paste("../final/",f,"_linchart_throughput.pdf",sep=""),linchart,width=5, height = 5, units = "in", dpi=300)
 
 }

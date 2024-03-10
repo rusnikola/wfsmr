@@ -20,9 +20,9 @@
 library(plyr)
 library(ggplot2)
 
-filenames<-c("hashmap","list")
+filenames<-c("crturn")
 for (f in filenames){
-read.csv(paste("../final/",f,"_result_retired_read.csv",sep=""))->lindata
+read.csv(paste("../final/",f,"_result.csv",sep=""))->lindata
 
 lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=RCU","EBR",lindata$environment))
 lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=Hazard","HP",lindata$environment))
@@ -36,9 +36,10 @@ lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=HE","HE",lind
 lindata$environment<-as.factor(gsub("emptyf=120:epochf=110:tracker=Range_new","IBR",lindata$environment))
 
 # Compute average and max retired objects per operation from raw data
-ddply(.data=lindata,.(environment,threads),mutate,retired_avg= min(obj_retired)/(mean(ops)))->lindata
+ddply(.data=lindata,.(environment,threads),mutate,retired_avg= mean(obj_retired)/(mean(ops)))->lindata
 ddply(.data=lindata,.(environment,threads),mutate,ops_max= max(ops)/(interval*1000000))->lindata
 
+nildatalin <- subset(lindata,environment=="None")
 rcudatalin <- subset(lindata,environment=="EBR")
 hazarddatalin <- subset(lindata,environment=="HP")
 hrdatalin <- subset(lindata,environment=="Crystalline-L")
@@ -49,59 +50,59 @@ wfedatalin <- subset(lindata,environment=="WFE")
 hedatalin <- subset(lindata,environment=="HE")
 rangenewdatalin <- subset(lindata,environment=="IBR")
 
-lindata = rbind(rcudatalin, rangenewdatalin, wfrdatalin, hrdatalin, frrdatalin, frdatalin, wfedatalin, hedatalin, hazarddatalin)
-lindata$environment <- factor(lindata$environment, levels=c("EBR", "WFE", "HE", "IBR", "Crystalline-W", "Crystalline-L", "Hyaline-1S", "Hyaline-1", "HP"))
+lindata = rbind(nildatalin, rcudatalin, wfrdatalin, hrdatalin, frrdatalin, frdatalin, wfedatalin, hedatalin, rangenewdatalin, hazarddatalin)
+lindata$environment <- factor(lindata$environment, levels=c("None", "EBR", "WFE", "HE", "Crystalline-W", "Crystalline-L", "Hyaline-1S", "Hyaline-1", "IBR", "HP"))
 
 # Set up colors and shapes (invariant for all plots)
-color_key = c("#0000FF", "#0066FF", "#FF0000", "#FF007F",
+color_key = c("#000000", "#0000FF", "#FF0000", "#FF007F",
               "#1BC40F", "#DA9100",
-              "#013220", "#3EB489", "#800080")
+              "#013220", "#3EB489", "#0066FF", "#800080")
 names(color_key) <- unique(c(as.character(lindata$environment)))
 
-shape_key = c(5,0,6,4,2,62,1,3,18)
+shape_key = c(17,5,6,4,2,62,1,3,0,18)
 names(shape_key) <- unique(c(as.character(lindata$environment)))
 
-line_key = c(1,4,1,2,1,2,1,2,1)
+line_key = c(1,1,1,2,1,2,1,2,4,1)
 names(line_key) <- unique(c(as.character(lindata$environment)))
 
 
-##########################################
-#### Begin charts for retired objects ####
-##########################################
+#####################################
+#### Begin charts for throughput ####
+#####################################
 
-legend_pos=c(0.5,0.86)
+legend_pos=c(0.56,0.86)
 y_range_down = 0
-y_range_up = 2000
+y_range_up = 160
 
 # Benchmark-specific plot formatting
 if(f=="bonsai"){
-  y_range_down=0
-  legend_pos=c(0.4,0.9)
-  y_range_up=1700
+  y_range_down=0.07
+  legend_pos=c(0.6,0.9)
+  y_range_up=0.25
 }else if(f=="list"){
   y_range_down=0
-  y_range_up=450
+  y_range_up=0.125
 }else if(f=="crturn"){
   y_range_down=0
-  y_range_up=3190
-}else if(f=="hashmap"){
-  y_range_up=4800
+  y_range_up=5
 }else if(f=="natarajan"){
-  y_range_up=4300
+  y_range_up=68
+}else if(f=="hashmap"){
+  legend_pos=c(0.5,0.9)
 }
 
 # Generate the plots
 linchart<-ggplot(data=lindata,
-                  aes(x=threads,y=retired_avg,color=environment, shape=environment, linetype=environment))+
-  geom_line()+xlab("Threads")+ylab("Retired Objects per Operation")+geom_point(size=4)+
+                  aes(x=threads,y=ops_max,color=environment, shape=environment, linetype=environment))+
+  geom_line()+xlab("Threads")+ylab("Throughput (M ops/sec)")+geom_point(size=4)+
   scale_shape_manual(values=shape_key[names(shape_key) %in% lindata$environment])+
   scale_linetype_manual(values=line_key[names(line_key) %in% lindata$environment])+
   theme_bw()+ guides(shape=guide_legend(title=NULL,nrow = 4))+ 
   guides(color=guide_legend(title=NULL,nrow = 4))+
   guides(linetype=guide_legend(title=NULL,nrow = 4))+
   scale_color_manual(values=color_key[names(color_key) %in% lindata$environment])+
-  scale_x_continuous(breaks=c(1,16,32,48,64,80,96,128,160,192),
-                minor_breaks=c(1,16,32,48,64,80,96,112,128,144,160,176,192))+
+  scale_x_continuous(breaks=c(1,16,32,48,64,80,96),
+                minor_breaks=c(1,16,32,48,64,80,96))+
   theme(plot.margin = unit(c(.2,0,.2,0), "cm"))+
   theme(legend.position=legend_pos,
      legend.direction="horizontal")+
@@ -112,6 +113,6 @@ linchart<-ggplot(data=lindata,
   ylim(y_range_down,y_range_up)
 
 # Save all four plots to separate PDFs
-ggsave(filename = paste("../final/",f,"_linchart_retired_read.pdf",sep=""),linchart,width=5, height = 5, units = "in", dpi=300)
+ggsave(filename = paste("../final/",f,"_linchart_throughput.pdf",sep=""),linchart,width=5, height = 5, units = "in", dpi=300)
 
 }
