@@ -39,7 +39,7 @@
 
 #define WFR_INVPTR64	((uint64_t)-1LL)
 #define WFR_INVPTR		((WFRInfo*)-1LL)
-#define MAX_WFR			8
+#define MAX_WFR			16
 #define MAX_WFRC		12
 #define WFR_PROTECT1	(1ULL << 63)
 #define WFR_PROTECT2	(1ULL << 62)

@@ -31,6 +31,7 @@ limitations under the License.
 #include "rideables/LinkList.hpp"
 #include "rideables/LinkListStall.hpp"
 #include "rideables/CRTurnQueue.hpp"
+#include "rideables/SkipList.hpp"
 
 
 #if (__x86_64__ || __ppc64__)
@@ -69,6 +70,8 @@ int main(int argc, char *argv[])
 	gtc->addRideableOption(new LinkListStallFactory<std::string,std::string>(), "LinkListStall");
 
 	gtc->addRideableOption(new CRTurnQueueFactory<std::string,std::string>(), "CRTurnQueue");
+
+	gtc->addRideableOption(new SkipListFactory<std::string,std::string>(), "SkipList");
 
 	//gtc->addRideableOption(new SortedUnorderedMapHazardFactory<std::string,std::string>(), "SortedUnorderedMapHazard");
 	// gtc->addRideableOption(new SortedUnorderedMapRCUFactory<std::string,std::string>(), "SortedUnorderedMapRCU");

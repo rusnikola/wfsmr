@@ -59,7 +59,7 @@ limitations under the License.
 
 #include "dcas.hpp"
 
-#define MAX_WFE		8
+#define MAX_WFE		16
 
 union word_pair_t {
 	std::atomic<uint64_t> pair[2];
